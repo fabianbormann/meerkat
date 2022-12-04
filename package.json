@@ -1,0 +1,55 @@
+{
+  "name": "meerkat",
+  "version": "0.1.0",
+  "description": "Browser-to-browser networking built on WebTorrent",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
+  "scripts": {
+    "build": "rollup -c --bundleConfigAsCjs",
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fabianbormann/meerkat.git"
+  },
+  "keywords": [
+    "WebTorrent",
+    "Peer",
+    "to",
+    "peer",
+    "WebRTC"
+  ],
+  "author": "Fabian Bormann",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/fabianbormann/meerkat/issues"
+  },
+  "homepage": "https://github.com/fabianbormann/meerkat#readme",
+  "devDependencies": {
+    "@babel/core": "^7.20.5",
+    "@babel/preset-env": "^7.20.2",
+    "@rollup/plugin-babel": "^6.0.3",
+    "@rollup/plugin-commonjs": "^23.0.3",
+    "@rollup/plugin-node-resolve": "^15.0.1",
+    "@types/bs58check": "^2.1.0",
+    "@types/jest": "^29.2.3",
+    "@types/ripemd160": "^2.0.0",
+    "@types/webtorrent": "^0.109.3",
+    "jest": "^29.3.1",
+    "rollup": "^3.5.1",
+    "rollup-plugin-peer-deps-external": "^2.2.4",
+    "rollup-plugin-polyfill-node": "^0.11.0",
+    "rollup-plugin-typescript2": "^0.34.1",
+    "ts-jest": "^29.0.3",
+    "typescript": "^4.9.3"
+  },
+  "dependencies": {
+    "@rvagg/ripemd160": "^2.2.2",
+    "bs58": "^5.0.0",
+    "bs58check": "^2.1.2",
+    "buffer": "^6.0.3",
+    "events": "^3.3.0",
+    "tweetnacl": "^1.0.3",
+    "webtorrent": "^1.9.4"
+  }
+}
