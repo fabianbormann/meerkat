@@ -5,7 +5,7 @@ import WebTorrent from 'webtorrent';
 import * as bs58 from 'bs58';
 import * as ripemd160 from 'ripemd160';
 import { Peer } from './types';
-import { EventEmitter } from 'events';
+import EventEmitter from 'events';
 import * as bencode from './lib/bencode';
 
 const PEER_TIMEOUT = 5 * 60 * 1000;
@@ -95,7 +95,7 @@ export default class Meerkat extends EventEmitter {
     const packet = this.makePacket({ y: 'x' });
     this.sendRaw(packet);
 
-    if (this.webTorrent && this.torrentCreated) {
+    if (typeof this.webTorrent !== 'undefined' && this.torrentCreated) {
       this.webTorrent.remove(this.torrent);
     }
   }
