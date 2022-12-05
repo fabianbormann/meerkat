@@ -35,15 +35,12 @@ export default [
   {
     input: 'meerkat.ts',
     plugins: [
+      commonjs(),
       typescript({ useTsconfigDeclarationDir: true }),
       peerDepsExternal({ includeDependencies: true }),
       nodePolyfills(),
       nodeResolve({
         preferBuiltins: false,
-      }),
-      commonjs({
-        exclude: 'node_modules',
-        ignoreGlobal: true,
       }),
       babel({
         babelHelpers: 'bundled',
@@ -52,7 +49,7 @@ export default [
     external: ['tweetnacl', 'bs58check', 'webtorrent', 'bs58'],
     output: {
       file: `dist/meerkat.min.js`,
-      format: 'umd',
+      format: 'iife',
       name: 'Meerkat',
       esModule: false,
       exports: 'named',

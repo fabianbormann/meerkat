@@ -1,12 +1,13 @@
-import * as nacl from 'tweetnacl';
-import * as bs58check from 'bs58check';
+import nacl, { randomBytes } from 'tweetnacl';
+import type { SignKeyPair, BoxKeyPair } from 'tweetnacl';
+import bs58check from 'bs58check';
 import { Buffer } from 'buffer';
 import WebTorrent from 'webtorrent';
-import * as bs58 from 'bs58';
-import * as ripemd160 from 'ripemd160';
-import { Peer } from './types';
+import bs58 from 'bs58';
+import ripemd160 from 'ripemd160';
+import type { Peer } from './types';
 import EventEmitter from 'events';
-import * as bencode from './lib/bencode';
+import { encode as bencode_encode } from './lib/bencode';
 
 const PEER_TIMEOUT = 5 * 60 * 1000;
 const EXT = 'bo_channel';
@@ -17,8 +18,8 @@ export default class Meerkat extends EventEmitter {
   seed: string;
   torrent: any;
   torrentCreated: boolean;
-  keyPair: nacl.SignKeyPair;
-  keyPairEncrypt: nacl.BoxKeyPair;
+  keyPair: SignKeyPair;
+  keyPairEncrypt: BoxKeyPair;
   publicKey: string;
   encryptedPublicKey: string;
   identifier: string;
@@ -42,7 +43,7 @@ export default class Meerkat extends EventEmitter {
       'wss://spacetradersapi-chatbox.herokuapp.com:443/announce',
       'ws://tracker.files.fm:7072/announce',
     ];
-    this.seed = seed || this.encodeseed(nacl.randomBytes(32));
+    this.seed = seed || this.encodeseed(randomBytes(32));
 
     this.keyPair = nacl.sign.keyPair.fromSeed(
       Uint8Array.from(bs58check.decode(this.seed)).slice(2)
@@ -125,11 +126,11 @@ export default class Meerkat extends EventEmitter {
       i: this.identifier,
       pk: this.publicKey,
       ek: this.encryptedPublicKey,
-      n: nacl.randomBytes(8),
+      n: randomBytes(8),
     };
 
-    const encodedPacket = bencode.encode(packet);
-    return bencode.encode({
+    const encodedPacket = bencode_encode(packet);
+    return bencode_encode({
       s: nacl.sign.detached(encodedPacket, this.keyPair.secretKey),
       p: packet,
     });
@@ -141,9 +142,7 @@ export default class Meerkat extends EventEmitter {
     return bs58check.encode(
       Buffer.concat([
         Buffer.from(ADDRESSPREFIX, 'hex'),
-        new ripemd160.default()
-          .update(Buffer.from(nacl.hash(address)))
-          .digest(),
+        new ripemd160().update(Buffer.from(nacl.hash(address))).digest(),
       ])
     );
   }

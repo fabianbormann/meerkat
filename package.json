@@ -17,6 +17,10 @@
     "Peer to peer",
     "WebRTC"
   ],
+  "files": [
+    "dist"
+  ],
+  "types": "dist/meerkat.d.ts",
   "author": "Fabian Bormann",
   "license": "Apache-2.0",
   "bugs": {
