@@ -23,13 +23,13 @@ export default [
       },
     ],
     plugins: [
+      commonjs(),
       typescript({ useTsconfigDeclarationDir: true }),
       peerDepsExternal({ includeDependencies: true }),
       nodePolyfills(),
       nodeResolve({
         preferBuiltins: false,
       }),
-      commonjs(),
     ],
   },
   {
