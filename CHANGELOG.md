@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.2](https://github.com/fabianbormann/meerkat/compare/v1.0.1...v1.0.2) (2022-12-06)
+
+
+### Bug Fixes
+
+* polyfills for stream and other builtins ([8839e4c](https://github.com/fabianbormann/meerkat/commit/8839e4cc23046ba73c23b11cbdc1cee91f5a213e))
+
 ## [1.0.1](https://github.com/fabianbormann/meerkat/compare/v1.0.0...v1.0.1) (2022-12-06)
 
 
