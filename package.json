@@ -1,6 +1,6 @@
 {
   "name": "@fabianbormann/meerkat",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Browser-to-browser networking built on WebTorrent",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
