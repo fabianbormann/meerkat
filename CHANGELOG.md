@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/fabianbormann/meerkat/compare/v1.0.0...v1.0.1) (2022-12-06)
+
+
+### Bug Fixes
+
+* change name to make sure that meerkat can be published to npmjs ([98a93d4](https://github.com/fabianbormann/meerkat/commit/98a93d476c7f77d2c27d8f051d61b66b491fc4e1))
+
 ## 1.0.0 (2022-12-05)
 
 
