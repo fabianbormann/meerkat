@@ -1,35 +1,34 @@
-import { nodeResolve } from '@rollup/plugin-node-resolve';
-import peerDepsExternal from 'rollup-plugin-peer-deps-external';
+import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import typescript from 'rollup-plugin-typescript2';
 import babel from '@rollup/plugin-babel';
-import nodePolyfills from 'rollup-plugin-node-polyfills';
+import nodePolyfills from 'rollup-plugin-polyfill-node';
+import json from '@rollup/plugin-json';
 
 import packageJson from './package.json' assert { type: 'json' };
+
+const nodeResolve = resolve({
+  preferBuiltins: false,
+  mainFields: ['module', 'jsnext:main', 'browser'],
+});
 
 export default [
   {
     input: 'meerkat.ts',
-    output: [
-      {
-        file: packageJson.main,
-        format: 'cjs',
-        sourcemap: true,
-      },
-      {
-        file: packageJson.module,
-        format: 'esm',
-        sourcemap: true,
-      },
-    ],
+    output: {
+      file: packageJson.module,
+      format: 'esm',
+      sourcemap: true,
+    },
     plugins: [
+      babel({
+        babelHelpers: 'bundled',
+      }),
       commonjs(),
       typescript({ useTsconfigDeclarationDir: true }),
-      peerDepsExternal({ includeDependencies: true }),
       nodePolyfills(),
-      nodeResolve({
-        preferBuiltins: false,
-      }),
+      nodeResolve,
+      json(),
     ],
   },
   {
@@ -37,9 +36,9 @@ export default [
     plugins: [
       commonjs(),
       typescript({ useTsconfigDeclarationDir: true }),
-      peerDepsExternal({ includeDependencies: true }),
       nodePolyfills(),
-      nodeResolve({
+      resolve({
+        browser: true,
         preferBuiltins: false,
       }),
       babel({
