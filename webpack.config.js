@@ -6,7 +6,7 @@ const config = {
   mode: 'production',
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: 'meerkat.js',
+    filename: 'meerkat.min.js',
     library: ['Meerkat', 'meerkat'],
     libraryTarget: 'umd',
   },
