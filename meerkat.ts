@@ -5,7 +5,7 @@ import { Buffer } from 'buffer';
 import WebTorrent from 'webtorrent';
 import bs58 from 'bs58';
 import ripemd160 from 'ripemd160';
-import type { Peer } from './types';
+import type { MeerkatParameters, Peer } from './types';
 import EventEmitter from 'events';
 import { encode as bencode_encode } from './lib/bencode';
 
@@ -31,8 +31,9 @@ export default class Meerkat extends EventEmitter {
   serveraddress: any = null;
   heartbeattimer: any = null;
 
-  constructor(identifier?: string, announce?: Array<string>, seed?: string) {
+  constructor(parameters: MeerkatParameters = {}) {
     super();
+    const { identifier, announce, seed } = parameters;
 
     this.announce = announce || [
       'udp://tracker.opentrackr.org:1337/announce',
@@ -59,6 +60,7 @@ export default class Meerkat extends EventEmitter {
     this.lastwirecount = null;
 
     this.webTorrent = new WebTorrent();
+    console.log('meerkat identifier', this.identifier);
     /*this.torrent = this.webTorrent.seed(
       Buffer.from(this.identifier),
       { name: this.identifier, announce: this.announce },
@@ -78,9 +80,9 @@ export default class Meerkat extends EventEmitter {
           this.connections();
         });
       }
-    );
+    );*/
 
-    this.torrentCreated = true;*/
+    this.torrentCreated = true;
     //this.torrent.on("wire", this.attach(this, this.identifier));
   }
 

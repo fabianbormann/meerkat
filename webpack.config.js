@@ -4,13 +4,13 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 
 const config = {
   mode: 'production',
+  entry: path.resolve(__dirname, 'meerkat.ts'),
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'meerkat.min.js',
     library: ['Meerkat', 'meerkat'],
     libraryTarget: 'umd',
   },
-  entry: path.resolve(__dirname, 'meerkat.ts'),
   experiments: {
     asyncWebAssembly: true,
     syncWebAssembly: true,

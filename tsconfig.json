@@ -1,21 +1,21 @@
 {
   "compilerOptions": {
-    "target": "es5",
-    "baseUrl": ".",
-    "lib": ["dom", "dom.iterable"],
+    "target": "es2015",
+    "outDir": "dist",
+    "lib": ["DOM", "ES5", "ES6"],
+    "declaration": true,
+    "declarationDir": "dist",
     "allowJs": true,
     "skipLibCheck": true,
-    "strict": true,
-    "forceConsistentCasingInFileNames": true,
-    "noEmit": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "module": "esnext",
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "module": "es2015",
     "moduleResolution": "node",
     "resolveJsonModule": true,
-    "isolatedModules": true,
-    "jsx": "preserve",
-    "incremental": true
+    "removeComments": true,
+    "isolatedModules": true
   },
   "include": ["./meerkat.ts", "./lib/*.ts"],
   "exclude": ["node_modules", "dist"]

@@ -4,6 +4,12 @@ export interface Peer {
   timestamp: number;
 }
 
+export type MeerkatParameters = {
+  identifier?: string;
+  announce?: Array<string>;
+  seed?: string;
+};
+
 export type BufferData =
   | Number
   | SetConstructor
