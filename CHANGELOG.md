@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.0.4](https://github.com/fabianbormann/meerkat/compare/v1.0.3...v1.0.4) (2022-12-07)
+
+
+### Bug Fixes
+
+* almost working rollup bundle ([b36ed5a](https://github.com/fabianbormann/meerkat/commit/b36ed5a393f4410d05147ba6f3984f8cc234d38d))
+* lib path ([07a86ab](https://github.com/fabianbormann/meerkat/commit/07a86ab2d47bfc3507bc3c5040c6fdfbc0b59834))
+* remove rollup and use webpack instead to bring the browser build alive ([8f920f2](https://github.com/fabianbormann/meerkat/commit/8f920f2ea4db956c5c461ecf45a859876a876c4e))
+
 ## [1.0.3](https://github.com/fabianbormann/meerkat/compare/v1.0.2...v1.0.3) (2022-12-07)
 
 
