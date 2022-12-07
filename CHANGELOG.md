@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.3](https://github.com/fabianbormann/meerkat/compare/v1.0.2...v1.0.3) (2022-12-07)
+
+
+### Bug Fixes
+
+* browser rollup build ([ce86eab](https://github.com/fabianbormann/meerkat/commit/ce86eabc72f0e67f6cd9c3836de0946ed62efb30))
+
 ## [1.0.2](https://github.com/fabianbormann/meerkat/compare/v1.0.1...v1.0.2) (2022-12-06)
 
 
