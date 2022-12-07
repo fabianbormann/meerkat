@@ -1,4 +1,4 @@
-import nacl, { randomBytes } from 'tweetnacl';
+import nacl from 'tweetnacl';
 import type { SignKeyPair, BoxKeyPair } from 'tweetnacl';
 import bs58check from 'bs58check';
 import { Buffer } from 'buffer';
@@ -17,7 +17,7 @@ export default class Meerkat extends EventEmitter {
   webTorrent: any;
   seed: string;
   torrent: any;
-  torrentCreated: boolean;
+  torrentCreated: boolean = false;
   keyPair: SignKeyPair;
   keyPairEncrypt: BoxKeyPair;
   publicKey: string;
@@ -43,7 +43,7 @@ export default class Meerkat extends EventEmitter {
       'wss://spacetradersapi-chatbox.herokuapp.com:443/announce',
       'ws://tracker.files.fm:7072/announce',
     ];
-    this.seed = seed || this.encodeseed(randomBytes(32));
+    this.seed = seed || this.encodeseed(nacl.randomBytes(32));
 
     this.keyPair = nacl.sign.keyPair.fromSeed(
       Uint8Array.from(bs58check.decode(this.seed)).slice(2)
@@ -59,7 +59,7 @@ export default class Meerkat extends EventEmitter {
     this.lastwirecount = null;
 
     this.webTorrent = new WebTorrent();
-    this.torrent = this.webTorrent.seed(
+    /*this.torrent = this.webTorrent.seed(
       Buffer.from(this.identifier),
       { name: this.identifier, announce: this.announce },
       () => {
@@ -80,7 +80,7 @@ export default class Meerkat extends EventEmitter {
       }
     );
 
-    this.torrentCreated = true;
+    this.torrentCreated = true;*/
     //this.torrent.on("wire", this.attach(this, this.identifier));
   }
 
@@ -126,7 +126,7 @@ export default class Meerkat extends EventEmitter {
       i: this.identifier,
       pk: this.publicKey,
       ek: this.encryptedPublicKey,
-      n: randomBytes(8),
+      n: nacl.randomBytes(8),
     };
 
     const encodedPacket = bencode_encode(packet);

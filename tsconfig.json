@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "es2015",
     "outDir": "dist",
-    "lib": ["DOM", "ES6", "ESNext"],
+    "lib": ["DOM", "ES5", "ES6"],
     "declaration": true,
     "declarationDir": "dist",
     "allowJs": true,
@@ -11,9 +11,10 @@
     "allowSyntheticDefaultImports": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true,
-    "module": "es2015",
+    "module": "esnext",
     "moduleResolution": "node",
     "resolveJsonModule": true,
+    "removeComments": true,
     "isolatedModules": true,
     "noEmit": true
   },
