@@ -1,5 +1,5 @@
 import { Buffer } from 'buffer';
-import { BufferData } from '../types';
+import type { BufferData, Packet } from '../types';
 
 /**
  * source:
@@ -183,3 +183,164 @@ encode.listSet = function (buffers: Buffer[], data: any) {
 
   buffers.push(buffE);
 };
+
+const INTEGER_START = 0x69; // 'i'
+const STRING_DELIM = 0x3a; // ':'
+const DICTIONARY_START = 0x64; // 'd'
+const LIST_START = 0x6c; // 'l'
+const END_OF_TYPE = 0x65; // 'e'
+
+/**
+ * replaces parseInt(buffer.toString('ascii', start, end)).
+ * For strings with less then ~30 charachters, this is actually a lot faster.
+ *
+ * @param {Buffer} data
+ * @param {Number} start
+ * @param {Number} end
+ * @return {Number} calculated number
+ */
+function getIntFromBuffer(buffer: Buffer, start: number, end: number) {
+  let sum = 0;
+  let sign = 1;
+
+  for (let i = start; i < end; i++) {
+    const num = buffer[i];
+
+    if (num < 58 && num >= 48) {
+      sum = sum * 10 + (num - 48);
+      continue;
+    }
+
+    if (i === start && num === 43) {
+      // +
+      continue;
+    }
+
+    if (i === start && num === 45) {
+      // -
+      sign = -1;
+      continue;
+    }
+
+    if (num === 46) {
+      // .
+      // its a float. break here.
+      break;
+    }
+
+    throw new Error('not a number: buffer[' + i + '] = ' + num);
+  }
+
+  return sum * sign;
+}
+
+/**
+ * Decodes bencoded data.
+ *
+ * @param  {Buffer} data
+ * @param  {Number} start (optional)
+ * @param  {Number} end (optional)
+ * @param  {String} encoding (optional)
+ * @return {Object|Array|Buffer|String|Number}
+ */
+export function decode(rawData: Buffer | Uint8Array): Packet {
+  if (rawData == null || rawData.length === 0) {
+    return {};
+  }
+
+  let position = 0;
+  let data: Buffer;
+
+  if (!Buffer.isBuffer(rawData)) {
+    data = Buffer.from(rawData);
+  } else {
+    data = rawData;
+  }
+
+  const bytes = data.length;
+  const next = (): { [key: string]: any } | Array<any> | number | string => {
+    switch (data[position]) {
+      case DICTIONARY_START:
+        return decode_dictionary();
+      case LIST_START:
+        return decode_list();
+      case INTEGER_START:
+        return decode_integer();
+      default:
+        return decode_buffer();
+    }
+  };
+
+  const find = function (chr: number) {
+    let i = position;
+    const c = data.length;
+    const d = data;
+
+    while (i < c) {
+      if (d[i] === chr) return i;
+      i++;
+    }
+
+    throw new Error(
+      'Invalid data: Missing delimiter "' +
+        String.fromCharCode(chr) +
+        '" [0x' +
+        chr.toString(16) +
+        ']'
+    );
+  };
+
+  const decode_buffer = (): string | Buffer | Uint8Array => {
+    let sep = find(STRING_DELIM);
+    const length = getIntFromBuffer(data, position, sep);
+    const end = ++sep + length;
+
+    position = end;
+
+    return data.slice(sep, end);
+  };
+
+  const decode_dictionary = (): Object => {
+    position++;
+    const dict: { [key: string]: any } = {};
+
+    while (data[position] !== END_OF_TYPE) {
+      dict[decode_buffer().toString()] = next();
+    }
+
+    position++;
+    return dict;
+  };
+
+  const decode_list = (): Array<any> => {
+    position++;
+
+    const lst = [];
+
+    while (data[position] !== END_OF_TYPE) {
+      lst.push(next());
+    }
+
+    position++;
+
+    return lst;
+  };
+
+  const decode_integer = (): number => {
+    const end = find(END_OF_TYPE);
+    const number = getIntFromBuffer(data, position + 1, end);
+
+    position += end + 1 - position;
+
+    return number;
+  };
+
+  const raw = next();
+
+  if (typeof raw !== 'object') {
+    return {};
+  } else {
+    const packet: Packet = { ...raw };
+    return packet;
+  }
+}

@@ -5,7 +5,7 @@ describe('testing meerkat', () => {
     const meerkat = new Meerkat({
       seed: 'BogKWM9LYR1C631b96Qz6U2tc2GR6XnhPSqe6YXBNCuS3aDePtPt',
     });
-    let connected = false;
+    /*let connected = false;
     meerkat.on('connections', (clients) => {
       if (clients == 0 && connected == false) {
         connected = true;
@@ -18,6 +18,11 @@ describe('testing meerkat', () => {
 
       expect(clients.toBe(0));
       done();
+    });*/
+
+    meerkat.on('torrent', () => {
+      done();
+      meerkat.close();
     });
-  }, 5000);
+  }, 15000);
 });
