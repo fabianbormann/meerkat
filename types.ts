@@ -15,7 +15,7 @@ export type Packet = {
   rr?: Uint8Array;
   y?: string;
   t?: number;
-  [key: string]: { [key: string]: any } | Array<any> | number | string;
+  [key: string]: any;
 };
 
 export type MeerkatParameters = {

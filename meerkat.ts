@@ -104,10 +104,10 @@ export default class Meerkat extends EventEmitter {
   }
 
   extension(wire: Wire): ExtensionConstructor {
-    function WireExtension(this: any, wire: Wire) {
+    const WireExtension: any = function (this: any, wire: Wire) {
       this.wire = wire;
       this.name = EXT;
-    }
+    };
 
     wire.extendedHandshake.identifier = this.identifier;
     wire.extendedHandshake.publicKey = this.publicKey;
@@ -150,6 +150,7 @@ export default class Meerkat extends EventEmitter {
         const packet = bencode_decode(unpacked.p);
         if (
           typeof packet.pk !== 'undefined' &&
+          typeof packet.ek !== 'undefined' &&
           typeof packet.t !== 'undefined' &&
           typeof packet.i !== 'undefined'
         ) {
@@ -322,7 +323,7 @@ export default class Meerkat extends EventEmitter {
   ) {
     const packet = { y: 'rr', rn: nonce, rr: '' };
     if (this.api[call]) {
-      this.api[call](this.address(publicKey), args, function (result: Object) {
+      this.api[call](this.address(publicKey), args, (result: Object) => {
         packet['rr'] = JSON.stringify(result);
         this.makeEncryptSendPacket(publicKey, packet);
       });
@@ -338,8 +339,8 @@ export default class Meerkat extends EventEmitter {
     this.sendRaw(encryptedPacket);
   }
 
-  encryptPacket(pk, packet) {
-    if (this.peers[this.address(pk)]) {
+  encryptPacket(publicKey: string, packet: Buffer) {
+    if (this.peers[this.address(publicKey)]) {
       var nonce = nacl.randomBytes(nacl.box.nonceLength);
       packet = bencode_encode({
         n: nonce,
@@ -347,17 +348,17 @@ export default class Meerkat extends EventEmitter {
         e: nacl.box(
           packet,
           nonce,
-          bs58.decode(this.peers[this.address(pk)].encryptedPublicKey),
+          bs58.decode(this.peers[this.address(publicKey)].encryptedPublicKey),
           this.keyPairEncrypt.secretKey
         ),
       });
     } else {
-      throw this.address(pk) + ' not seen - no encryption key.';
+      throw this.address(publicKey) + ' not seen - no encryption key.';
     }
     return packet;
   }
 
-  sawPeer(publicKey, encryptedPublicKey) {
+  sawPeer(publicKey: string, encryptedPublicKey: string) {
     var now = new Date().getTime();
     var address = this.address(publicKey);
     // ignore ourself
@@ -419,7 +420,10 @@ export default class Meerkat extends EventEmitter {
     }
   }
 
-  private static toHex(uint8Array: Uint8Array) {
+  private static toHex(uint8Array?: Uint8Array) {
+    if (typeof uint8Array === 'undefined') {
+      return '';
+    }
     return Buffer.from(uint8Array).toString('hex');
   }
 
