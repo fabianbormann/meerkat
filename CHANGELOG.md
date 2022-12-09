@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.6](https://github.com/fabianbormann/meerkat/compare/v1.0.5...v1.0.6) (2022-12-09)
+
+
+### Bug Fixes
+
+* repair broken package-lock file ([7245588](https://github.com/fabianbormann/meerkat/commit/72455884e84d5119515deb204609c0206c97f55d))
+
 ## [1.0.5](https://github.com/fabianbormann/meerkat/compare/v1.0.4...v1.0.5) (2022-12-09)
 
 
