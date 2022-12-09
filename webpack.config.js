@@ -15,6 +15,7 @@ const config = {
     asyncWebAssembly: true,
     syncWebAssembly: true,
   },
+  devtool: 'source-map',
   module: {
     rules: [
       {
@@ -45,9 +46,6 @@ const config = {
     },
   },
   plugins: [
-    new webpack.DefinePlugin({
-      process: { env: {} },
-    }),
     new webpack.ProgressPlugin(),
     new CleanWebpackPlugin({
       verbose: true,
@@ -55,6 +53,7 @@ const config = {
     }),
     new webpack.ProvidePlugin({
       Buffer: ['buffer', 'Buffer'],
+      process: 'process/browser',
     }),
   ],
   infrastructureLogging: {
