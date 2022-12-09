@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.0.5](https://github.com/fabianbormann/meerkat/compare/v1.0.4...v1.0.5) (2022-12-09)
+
+
+### Features
+
+* implement missing bugout features ([7f623da](https://github.com/fabianbormann/meerkat/commit/7f623da2bb3c0f7094288e1741d1c27646e21096))
+
+
+### Bug Fixes
+
+* add all missing type definitions ([245336f](https://github.com/fabianbormann/meerkat/commit/245336feb5f8f5106844ce3ce8f0ce53195516e8))
+* add more type declarations for bencode and bugout functions ([250a05f](https://github.com/fabianbormann/meerkat/commit/250a05f0a37fee74d15c57f68f0db872f5358238))
+* include type definitions ([335543b](https://github.com/fabianbormann/meerkat/commit/335543ba7341e664cfd70778e93dc03450627231))
+
 ## [1.0.4](https://github.com/fabianbormann/meerkat/compare/v1.0.3...v1.0.4) (2022-12-07)
 
 
