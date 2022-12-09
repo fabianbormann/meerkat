@@ -4,7 +4,7 @@ export interface Peer {
   last: number;
 }
 
-export type Paket = {
+export type Packet = {
   ek?: string;
   pk?: string;
   e?: Uint8Array;

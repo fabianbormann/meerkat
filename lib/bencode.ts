@@ -1,5 +1,5 @@
 import { Buffer } from 'buffer';
-import type { BufferData, Paket } from '../types';
+import type { BufferData, Packet } from '../types';
 
 /**
  * source:
@@ -243,127 +243,104 @@ function getIntFromBuffer(buffer: Buffer, start: number, end: number) {
  * @param  {String} encoding (optional)
  * @return {Object|Array|Buffer|String|Number}
  */
-export function decode(
-  data: Buffer | Uint8Array,
-  start?: number,
-  end?: number,
-  encoding?: string | null
-): Paket {
-  if (data == null || data.length === 0) {
+export function decode(rawData: Buffer | Uint8Array): Packet {
+  if (rawData == null || rawData.length === 0) {
     return {};
   }
 
-  if (typeof start !== 'number' && encoding == null) {
-    encoding = start;
-    start = undefined;
+  let position = 0;
+  let data: Buffer;
+
+  if (!Buffer.isBuffer(rawData)) {
+    data = Buffer.from(rawData);
+  } else {
+    data = rawData;
   }
 
-  if (typeof end !== 'number' && encoding == null) {
-    encoding = end;
-    end = undefined;
-  }
+  const bytes = data.length;
+  const next = (): { [key: string]: any } | Array<any> | number | string => {
+    switch (data[position]) {
+      case DICTIONARY_START:
+        return decode_dictionary();
+      case LIST_START:
+        return decode_list();
+      case INTEGER_START:
+        return decode_integer();
+      default:
+        return decode_buffer();
+    }
+  };
 
-  decode.position = 0;
-  decode.encoding = encoding || null;
+  const find = function (chr: number) {
+    let i = position;
+    const c = data.length;
+    const d = data;
 
-  decode.data = !Buffer.isBuffer(data)
-    ? Buffer.from(data)
-    : data.slice(start, end);
+    while (i < c) {
+      if (d[i] === chr) return i;
+      i++;
+    }
 
-  decode.bytes = decode.data.length;
+    throw new Error(
+      'Invalid data: Missing delimiter "' +
+        String.fromCharCode(chr) +
+        '" [0x' +
+        chr.toString(16) +
+        ']'
+    );
+  };
 
-  const raw = decode.next();
+  const decode_buffer = (): string | Buffer | Uint8Array => {
+    let sep = find(STRING_DELIM);
+    const length = getIntFromBuffer(data, position, sep);
+    const end = ++sep + length;
+
+    position = end;
+
+    return data.slice(sep, end);
+  };
+
+  const decode_dictionary = (): Object => {
+    position++;
+    const dict: { [key: string]: any } = {};
+
+    while (data[position] !== END_OF_TYPE) {
+      dict[decode_buffer().toString()] = next();
+    }
+
+    position++;
+    return dict;
+  };
+
+  const decode_list = (): Array<any> => {
+    position++;
+
+    const lst = [];
+
+    while (data[position] !== END_OF_TYPE) {
+      lst.push(next());
+    }
+
+    position++;
+
+    return lst;
+  };
+
+  const decode_integer = (): number => {
+    const end = find(END_OF_TYPE);
+    const number = getIntFromBuffer(data, position + 1, end);
+
+    position += end + 1 - position;
+
+    return number;
+  };
+
+  const raw = next();
 
   if (typeof raw !== 'object') {
     return {};
   } else {
-    const packet: Paket = { ...raw };
+    const packet: Packet = { ...raw };
     return packet;
   }
 }
-
-decode.bytes = 0;
-decode.position = 0;
-decode.data = null;
-decode.encoding = null;
-
-decode.next = (): { [key: string]: any } | Array<any> | number | string => {
-  switch (decode.data[decode.position]) {
-    case DICTIONARY_START:
-      return decode.dictionary();
-    case LIST_START:
-      return decode.list();
-    case INTEGER_START:
-      return decode.integer();
-    default:
-      return decode.buffer();
-  }
-};
-
-decode.find = function (chr: number) {
-  let i = decode.position;
-  const c = decode.data.length;
-  const d = decode.data;
-
-  while (i < c) {
-    if (d[i] === chr) return i;
-    i++;
-  }
-
-  throw new Error(
-    'Invalid data: Missing delimiter "' +
-      String.fromCharCode(chr) +
-      '" [0x' +
-      chr.toString(16) +
-      ']'
-  );
-};
-
-decode.dictionary = (): Object => {
-  decode.position++;
-
-  const dict = {};
-
-  while (decode.data[decode.position] !== END_OF_TYPE) {
-    dict[decode.buffer()] = decode.next();
-  }
-
-  decode.position++;
-
-  return dict;
-};
-
-decode.list = (): Array<any> => {
-  decode.position++;
-
-  const lst = [];
-
-  while (decode.data[decode.position] !== END_OF_TYPE) {
-    lst.push(decode.next());
-  }
-
-  decode.position++;
-
-  return lst;
-};
-
-decode.integer = (): number => {
-  const end = decode.find(END_OF_TYPE);
-  const number = getIntFromBuffer(decode.data, decode.position + 1, end);
-
-  decode.position += end + 1 - decode.position;
-
-  return number;
-};
-
-decode.buffer = (): string => {
-  let sep = decode.find(STRING_DELIM);
-  const length = getIntFromBuffer(decode.data, decode.position, sep);
-  const end = ++sep + length;
-
-  decode.position = end;
-
-  return decode.encoding
-    ? decode.data.toString(decode.encoding, sep, end)
-    : decode.data.slice(sep, end);
-};

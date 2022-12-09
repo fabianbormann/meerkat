@@ -10,7 +10,7 @@ import type {
 } from 'bittorrent-protocol';
 import bs58 from 'bs58';
 import ripemd160 from 'ripemd160';
-import type { MeerkatParameters, Peer } from './types';
+import type { MeerkatParameters, Packet, Peer } from './types';
 import EventEmitter from 'events';
 import {
   encode as bencode_encode,
@@ -34,8 +34,8 @@ export default class Meerkat extends EventEmitter {
   peers: { [key: string]: Peer } = {};
   seen: { [key: string]: number } = {};
   lastwirecount: any;
-  api = {};
-  callbacks = {};
+  api: { [key: string]: Function } = {};
+  callbacks: { [key: string]: Function } = {};
   serveraddress: any = null;
   heartbeattimer: any = null;
 
@@ -79,7 +79,7 @@ export default class Meerkat extends EventEmitter {
       () => {
         this.emit('torrent', this.identifier, this.torrent);
         if (this.torrent.discovery.tracker) {
-          this.torrent.discovery.tracker.on('update', (update) => {
+          this.torrent.discovery.tracker.on('update', (update: any) => {
             this.emit('tracker', this.identifier, update);
           });
         }
@@ -90,7 +90,7 @@ export default class Meerkat extends EventEmitter {
       }
     );
     this.torrentCreated = true;
-    this.torrent.on('wire', (wire) => this.attach(wire));
+    this.torrent.on('wire', (wire: Wire) => this.attach(wire));
   }
 
   attach(wire: Wire) {
@@ -98,13 +98,13 @@ export default class Meerkat extends EventEmitter {
     wire.on('close', () => this.detach(wire));
   }
 
-  detach(wire) {
+  detach(wire: Wire) {
     this.emit('wireleft', this.torrent.wires.length, wire);
     this.connections();
   }
 
   extension(wire: Wire): ExtensionConstructor {
-    function Extension(wire: Wire) {
+    function WireExtension(this: any, wire: Wire) {
       this.wire = wire;
       this.name = EXT;
     }
@@ -113,9 +113,9 @@ export default class Meerkat extends EventEmitter {
     wire.extendedHandshake.publicKey = this.publicKey;
     wire.extendedHandshake.encryptedPublicKey = this.encryptedPublicKey;
 
-    const wireExtension = new Extension(wire);
+    const wireExtension: any = new WireExtension(wire);
 
-    wireExtension.onExtendedHandshake = (handshake) =>
+    wireExtension.onExtendedHandshake = (handshake: { [key: string]: any }) =>
       this.onExtendedHandshake(wire, handshake);
     wireExtension.onMessage = (buffer: Buffer) => this.onMessage(buffer);
 
@@ -127,7 +127,7 @@ export default class Meerkat extends EventEmitter {
     const now = new Date().getTime();
 
     if (!this.seen[hash]) {
-      let unpacked = bencode_decode(message);
+      let unpacked: Packet | null = bencode_decode(message);
 
       if (unpacked.e && unpacked.n && unpacked.ek) {
         var ek = unpacked.ek.toString();
@@ -146,113 +146,131 @@ export default class Meerkat extends EventEmitter {
         }
       }
 
-      if (unpacked && unpacked.p) {
-        var packet = bencode_decode(unpacked.p);
-        var pk = packet.pk.toString();
-        var id = packet.i.toString();
-        var checksig = nacl.sign.detached.verify(
-          unpacked.p,
-          unpacked.s,
-          bs58.decode(pk)
-        );
-        var checkid = id == this.identifier;
-        var checktime = packet.t + PEER_TIMEOUT > now;
+      if (unpacked && unpacked.p && unpacked.s) {
+        const packet = bencode_decode(unpacked.p);
+        if (
+          typeof packet.pk !== 'undefined' &&
+          typeof packet.t !== 'undefined' &&
+          typeof packet.i !== 'undefined'
+        ) {
+          const pk = packet.pk.toString();
+          const id = packet.i.toString();
 
-        if (checksig && checkid && checktime) {
-          var ek = packet.ek.toString();
-          this.sawPeer(pk, ek);
+          const checksig = nacl.sign.detached.verify(
+            unpacked.p,
+            unpacked.s,
+            bs58.decode(pk)
+          );
+          const checkid = id === this.identifier;
+          const checktime = packet.t + PEER_TIMEOUT > now;
 
-          if (packet.y == 'm') {
-            var messagestring = packet.v.toString();
-            var messagejson = null;
-            try {
-              var messagejson = JSON.parse(messagestring);
-            } catch (e) {
-              console.warn(e);
-            }
-            if (messagejson) {
-              this.emit('message', this.address(pk), messagejson, packet);
-            }
-          } else if (packet.y == 'r') {
-            // rpc call
-            var call = packet.c.toString();
-            var argsstring = packet.a.toString();
-            try {
-              var args = JSON.parse(argsstring);
-            } catch (e) {
-              var args = null;
-              console.warn('Malformed args JSON: ' + argsstring);
-            }
-            const nonce = packet.rn;
-            this.emit(
-              'rpc',
-              this.address(pk),
-              call,
-              args,
-              Meerkat.toHex(nonce)
-            );
-            // make the API call and send back response
-            this.rpcCall(pk, call, args, nonce);
-          } else if (packet.y === 'rr') {
-            // rpc response
-            const nonce = Meerkat.toHex(packet.rn);
-            if (this.callbacks[nonce]) {
-              if (typeof packet['rr'] !== 'undefined') {
-                var responsestring = packet.rr.toString();
-              } else {
-                console.warn('Empty rr in rpc response.');
-              }
+          if (checksig && checkid && checktime) {
+            const ek = packet.ek.toString();
+            this.sawPeer(pk, ek);
+
+            if (packet.y == 'm') {
+              const messagestring = packet.v.toString();
+              const messagejson = null;
               try {
-                var responsestringstruct = JSON.parse(responsestring);
+                const messagejson = JSON.parse(messagestring);
               } catch (e) {
-                console.warn('Malformed response JSON: ' + responsestring);
-                var responsestringstruct = null;
+                console.warn(e);
               }
-              if (this.callbacks[nonce] && responsestringstruct) {
-                console.warn(
-                  'rpc-response',
-                  this.address(pk),
-                  nonce,
-                  responsestringstruct
-                );
-                this.emit(
-                  'rpc-response',
-                  this.address(pk),
-                  nonce,
-                  responsestringstruct
-                );
-                this.callbacks[nonce](responsestringstruct);
-                delete this.callbacks[nonce];
+              if (messagejson) {
+                this.emit('message', this.address(pk), messagejson, packet);
+              }
+            } else if (packet.y == 'r') {
+              // rpc call
+              const call = packet.c.toString();
+              const argsstring = packet.a.toString();
+              let args: { [key: string]: any } | null;
+              try {
+                args = JSON.parse(argsstring);
+              } catch (e) {
+                args = null;
+                console.warn('Malformed args JSON: ' + argsstring);
+              }
+              const nonce = packet.rn || new Uint8Array();
+              this.emit(
+                'rpc',
+                this.address(pk),
+                call,
+                args,
+                Meerkat.toHex(nonce)
+              );
+              // make the API call and send back response
+              this.rpcCall(pk, call, args, nonce);
+            } else if (packet.y === 'rr') {
+              // rpc response
+              const nonce = Meerkat.toHex(packet.rn);
+              if (this.callbacks[nonce]) {
+                let responsestring: string = '';
+                let responsestringstruct:
+                  | { [key: string]: any }
+                  | undefined
+                  | null;
+
+                if (typeof packet['rr'] !== 'undefined') {
+                  responsestring = packet.rr.toString();
+                } else {
+                  console.warn('Empty rr in rpc response.');
+                }
+
+                try {
+                  responsestringstruct = JSON.parse(responsestring);
+                } catch (e) {
+                  console.warn('Malformed response JSON: ' + responsestring);
+                  responsestringstruct = null;
+                }
+
+                if (this.callbacks[nonce] && responsestringstruct) {
+                  console.warn(
+                    'rpc-response',
+                    this.address(pk),
+                    nonce,
+                    responsestringstruct
+                  );
+                  this.emit(
+                    'rpc-response',
+                    this.address(pk),
+                    nonce,
+                    responsestringstruct
+                  );
+                  this.callbacks[nonce](responsestringstruct);
+                  delete this.callbacks[nonce];
+                } else {
+                  console.warn('RPC response nonce not known:', nonce);
+                }
               } else {
-                console.warn('RPC response nonce not known:', nonce);
+                console.warn('dropped response with no callback.', nonce);
               }
+            } else if (packet.y === 'p') {
+              const address = this.address(pk);
+              console.warn('ping from', address);
+              this.emit('ping', address);
+            } else if (packet.y === 'x') {
+              const address = this.address(pk);
+              console.warn('got left from', address);
+              delete this.peers[address];
+              this.emit('left', address);
             } else {
-              console.warn('dropped response with no callback.', nonce);
+              // TODO: handle ping/keep-alive message
+              console.warn('unknown packet type');
             }
-          } else if (packet.y === 'p') {
-            var address = this.address(pk);
-            console.warn('ping from', address);
-            this.emit('ping', address);
-          } else if (packet.y === 'x') {
-            var address = this.address(pk);
-            console.warn('got left from', address);
-            delete this.peers[address];
-            this.emit('left', address);
           } else {
-            // TODO: handle ping/keep-alive message
-            console.warn('unknown packet type');
+            console.warn(
+              'dropping bad packet',
+              hash,
+              checksig,
+              checkid,
+              checktime
+            );
           }
         } else {
-          console.warn(
-            'dropping bad packet',
-            hash,
-            checksig,
-            checkid,
-            checktime
-          );
+          console.warn('skipping packet with no payload', hash, unpacked);
         }
       } else {
-        console.warn('skipping packet with no payload', hash, unpacked);
+        console.warn('packet has missing mandatory fields', hash, unpacked);
       }
       // forward first-seen message to all connected wires
       // TODO: block flooders
@@ -264,30 +282,28 @@ export default class Meerkat extends EventEmitter {
     this.seen[hash] = now;
   }
 
-  onExtendedHandshake(wire: Wire, handshake) {
+  onExtendedHandshake(wire: Wire, handshake: { [key: string]: any }) {
     this.emit('wireseen', this.torrent.wires.length, wire);
     this.connections();
     // TODO: check sig and drop on failure - wire.peerExtendedHandshake
     this.sawPeer(handshake.pk.toString(), handshake.ek.toString());
   }
 
-  register(name: string, callback: () => any, docstring: string) {
+  register(name: string, callback: Function) {
     this.api[name] = callback;
-    this.api[name].docstring = docstring;
   }
 
-  rpc = function (address, call, args, callback) {
-    if (this.serveraddress && typeof args == 'function') {
-      callback = args;
-      args = call;
-      call = address;
-      address = this.serveraddress;
-    }
+  rpc(
+    address: string,
+    call: string,
+    args: { [key: string]: any },
+    callback: Function
+  ) {
     if (this.peers[address]) {
-      var pk = this.peers[address].pk;
+      const publicKey = this.peers[address].publicKey;
       var callnonce = nacl.randomBytes(8);
       this.callbacks[Meerkat.toHex(callnonce)] = callback;
-      this.makeEncryptSendPacket(this, pk, {
+      this.makeEncryptSendPacket(publicKey, {
         y: 'r',
         c: call,
         a: JSON.stringify(args),
@@ -296,25 +312,30 @@ export default class Meerkat extends EventEmitter {
     } else {
       throw address + ' not seen - no public key.';
     }
-  };
+  }
 
-  rpcCall(pk, call, args, nonce) {
-    var packet = { y: 'rr', rn: nonce };
+  rpcCall(
+    publicKey: string,
+    call: string,
+    args: { [key: string]: any } | null,
+    nonce: Uint8Array
+  ) {
+    const packet = { y: 'rr', rn: nonce, rr: '' };
     if (this.api[call]) {
-      this.api[call](this.address(pk), args, function (result) {
+      this.api[call](this.address(publicKey), args, function (result: Object) {
         packet['rr'] = JSON.stringify(result);
-        this.makeEncryptSendPacket(pk, packet);
+        this.makeEncryptSendPacket(publicKey, packet);
       });
     } else {
       packet['rr'] = JSON.stringify({ error: 'No such API call.' });
-      this.makeEncryptSendPacket(pk, packet);
+      this.makeEncryptSendPacket(publicKey, packet);
     }
   }
 
-  makeEncryptSendPacket(pk, packet) {
-    packet = this.makePacket(packet);
-    packet = this.encryptPacket(pk, packet);
-    this.sendRaw(packet);
+  makeEncryptSendPacket(publicKey: string, packetObject: Object) {
+    const packet = this.makePacket(packetObject);
+    const encryptedPacket = this.encryptPacket(publicKey, packet);
+    this.sendRaw(encryptedPacket);
   }
 
   encryptPacket(pk, packet) {
