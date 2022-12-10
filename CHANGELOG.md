@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.8](https://github.com/fabianbormann/meerkat/compare/v1.0.7...v1.0.8) (2022-12-10)
+
+
+### Features
+
+* add configurable logger instead of using console.log ([6f14556](https://github.com/fabianbormann/meerkat/commit/6f1455619a4846fe606bbfd401a711156b93e8b5))
+
 ## [1.0.7](https://github.com/fabianbormann/meerkat/compare/v1.0.6...v1.0.7) (2022-12-10)
 
 
