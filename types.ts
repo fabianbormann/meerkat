@@ -22,7 +22,10 @@ export type MeerkatParameters = {
   identifier?: string;
   announce?: Array<string>;
   seed?: string;
+  loggingEnabled?: boolean;
 };
+
+export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
 export type BufferData =
   | Number

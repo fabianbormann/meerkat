@@ -6,15 +6,15 @@ import WebTorrent from 'webtorrent';
 import type { Wire, ExtensionConstructor } from 'bittorrent-protocol';
 import bs58 from 'bs58';
 import ripemd160 from 'ripemd160';
-import type { MeerkatParameters, Packet, Peer } from './types';
+import type { LogLevel, MeerkatParameters, Packet, Peer } from './types';
 import EventEmitter from 'events';
 import {
   encode as bencode_encode,
   decode as bencode_decode,
 } from './lib/bencode';
-
 const PEER_TIMEOUT = 5 * 60 * 1000;
 const EXT = 'bo_channel';
+import Logger from './logger';
 
 export default class Meerkat extends EventEmitter {
   announce: Array<String>;
@@ -34,19 +34,19 @@ export default class Meerkat extends EventEmitter {
   callbacks: { [key: string]: Function } = {};
   serveraddress: any = null;
   heartbeattimer: any = null;
+  logLevel: number = 10;
+  logger: Logger;
 
   constructor(parameters: MeerkatParameters = {}) {
     super();
-    const { identifier, announce, seed } = parameters;
+    const { identifier, announce, seed, loggingEnabled } = parameters;
+    this.logger = new Logger({ scope: 'Meerkat', enabled: loggingEnabled });
 
     this.announce = announce || [
-      'udp://tracker.opentrackr.org:1337/announce',
-      'udp://open.tracker.cl:1337/announce',
-      'udp://opentracker.i2p.rocks:6969/announce',
-      'https://opentracker.i2p.rocks:443/announce',
       'wss://tracker.files.fm:7073/announce',
-      'wss://spacetradersapi-chatbox.herokuapp.com:443/announce',
+      'wss://tracker.btorrent.xyz',
       'ws://tracker.files.fm:7072/announce',
+      'wss://tracker.openwebtorrent.com:443/announce',
     ];
     this.seed = seed || this.encodeseed(nacl.randomBytes(32));
 
@@ -61,6 +61,8 @@ export default class Meerkat extends EventEmitter {
     );
 
     this.identifier = identifier || this.address();
+
+    this.logger.debug(`Meerkat address: ${this.identifier}`);
     this.lastwirecount = null;
 
     this.webTorrent = new WebTorrent({});
@@ -86,6 +88,18 @@ export default class Meerkat extends EventEmitter {
     );
     this.torrentCreated = true;
     this.torrent.on('wire', (wire: Wire) => this.attach(wire));
+  }
+
+  disableLogging() {
+    this.logger.disable();
+  }
+
+  enableLogging() {
+    this.logger.enable();
+  }
+
+  setLogLevel(logLevel: LogLevel) {
+    this.logger.logLevel = logLevel;
   }
 
   attach(wire: Wire) {
@@ -177,7 +191,7 @@ export default class Meerkat extends EventEmitter {
               try {
                 messagejson = JSON.parse(messagestring);
               } catch (e) {
-                console.warn(e);
+                this.logger.warn(e);
               }
               if (messagejson) {
                 this.emit('message', this.address(pk), messagejson, packet);
@@ -191,7 +205,7 @@ export default class Meerkat extends EventEmitter {
                 args = JSON.parse(argsstring);
               } catch (e) {
                 args = null;
-                console.warn('Malformed args JSON: ' + argsstring);
+                this.logger.error(`Malformed args JSON: ${argsstring}`);
               }
               const nonce = packet.rn || new Uint8Array();
               this.emit(
@@ -216,18 +230,20 @@ export default class Meerkat extends EventEmitter {
                 if (typeof packet['rr'] !== 'undefined') {
                   responsestring = packet.rr.toString();
                 } else {
-                  console.warn('Empty rr in rpc response.');
+                  this.logger.debug('Empty rr in rpc response.');
                 }
 
                 try {
                   responsestringstruct = JSON.parse(responsestring);
                 } catch (e) {
-                  console.warn('Malformed response JSON: ' + responsestring);
+                  this.logger.error(
+                    'Malformed response JSON: ' + responsestring
+                  );
                   responsestringstruct = null;
                 }
 
                 if (this.callbacks[nonce] && responsestringstruct) {
-                  console.warn(
+                  this.logger.debug(
                     'rpc-response',
                     this.address(pk),
                     nonce,
@@ -242,26 +258,26 @@ export default class Meerkat extends EventEmitter {
                   this.callbacks[nonce](responsestringstruct);
                   delete this.callbacks[nonce];
                 } else {
-                  console.warn('RPC response nonce not known:', nonce);
+                  this.logger.debug('RPC response nonce not known:', nonce);
                 }
               } else {
-                console.warn('dropped response with no callback.', nonce);
+                this.logger.debug('dropped response with no callback.', nonce);
               }
             } else if (packetType === 'p') {
               const address = this.address(pk);
-              console.warn('ping from', address);
+              this.logger.debug('ping from', address);
               this.emit('ping', address);
             } else if (packetType === 'x') {
               const address = this.address(pk);
-              console.warn('got left from', address);
+              this.logger.debug('got left from', address);
               delete this.peers[address];
               this.emit('left', address);
             } else {
               // TODO: handle ping/keep-alive message
-              console.warn('unknown packet type');
+              this.logger.warn('unknown packet type');
             }
           } else {
-            console.warn(
+            this.logger.warn(
               'dropping bad packet',
               hash,
               checksig,
@@ -270,16 +286,16 @@ export default class Meerkat extends EventEmitter {
             );
           }
         } else {
-          console.warn('skipping packet with no payload', hash, unpacked);
+          this.logger.debug('skipping packet with no payload', hash, unpacked);
         }
       } else {
-        console.warn('packet has missing mandatory fields', hash, unpacked);
+        this.logger.debug('packet has no payload', hash, unpacked);
       }
       // forward first-seen message to all connected wires
       // TODO: block flooders
       this.sendRaw(message);
     } else {
-      console.log('already seen', hash);
+      this.logger.debug('already seen', hash);
     }
     // refresh last-seen timestamp on this message
     this.seen[hash] = now;
