@@ -3,11 +3,7 @@ import type { SignKeyPair, BoxKeyPair } from 'tweetnacl';
 import bs58check from 'bs58check';
 import { Buffer } from 'buffer';
 import WebTorrent from 'webtorrent';
-import type {
-  Wire,
-  ExtensionConstructor,
-  Extension,
-} from 'bittorrent-protocol';
+import type { Wire, ExtensionConstructor } from 'bittorrent-protocol';
 import bs58 from 'bs58';
 import ripemd160 from 'ripemd160';
 import type { MeerkatParameters, Packet, Peer } from './types';
@@ -68,7 +64,6 @@ export default class Meerkat extends EventEmitter {
     this.lastwirecount = null;
 
     this.webTorrent = new WebTorrent({});
-    console.log('meerkat identifier', this.identifier);
 
     this.torrent = this.webTorrent.seed(
       Buffer.from(this.identifier),
@@ -104,22 +99,27 @@ export default class Meerkat extends EventEmitter {
   }
 
   extension(wire: Wire): ExtensionConstructor {
-    const WireExtension: any = function (this: any, wire: Wire) {
-      this.wire = wire;
-      this.name = EXT;
-    };
+    const WireExtension: any = ((
+      identifier: string,
+      publicKey: string,
+      encryptedPublicKey: string
+    ): any => {
+      return function (this: any, wire: Wire) {
+        wire.extendedHandshake.identifier = identifier;
+        wire.extendedHandshake.publicKey = publicKey;
+        wire.extendedHandshake.encryptedPublicKey = encryptedPublicKey;
+        this.wire = wire;
+      };
+    })(this.identifier, this.publicKey, this.encryptedPublicKey);
 
-    wire.extendedHandshake.identifier = this.identifier;
-    wire.extendedHandshake.publicKey = this.publicKey;
-    wire.extendedHandshake.encryptedPublicKey = this.encryptedPublicKey;
+    WireExtension.prototype.name = EXT;
+    WireExtension.prototype.onExtendedHandshake = (handshake: {
+      [key: string]: any;
+    }) => this.onExtendedHandshake(wire, handshake);
+    WireExtension.prototype.onMessage = (buffer: Buffer) =>
+      this.onMessage(buffer);
 
-    const wireExtension: any = new WireExtension(wire);
-
-    wireExtension.onExtendedHandshake = (handshake: { [key: string]: any }) =>
-      this.onExtendedHandshake(wire, handshake);
-    wireExtension.onMessage = (buffer: Buffer) => this.onMessage(buffer);
-
-    return wireExtension;
+    return WireExtension;
   }
 
   onMessage(message: Buffer) {
@@ -130,9 +130,8 @@ export default class Meerkat extends EventEmitter {
       let unpacked: Packet | null = bencode_decode(message);
 
       if (unpacked.e && unpacked.n && unpacked.ek) {
-        var ek = unpacked.ek.toString();
-
-        var decrypted = nacl.box.open(
+        const ek = unpacked.ek.toString();
+        const decrypted = nacl.box.open(
           unpacked.e,
           unpacked.n,
           bs58.decode(ek),
@@ -147,7 +146,9 @@ export default class Meerkat extends EventEmitter {
       }
 
       if (unpacked && unpacked.p && unpacked.s) {
-        const packet = bencode_decode(unpacked.p);
+        const wrappedPacket = bencode_encode(unpacked.p);
+        const packet = bencode_decode(wrappedPacket);
+
         if (
           typeof packet.pk !== 'undefined' &&
           typeof packet.ek !== 'undefined' &&
@@ -156,9 +157,10 @@ export default class Meerkat extends EventEmitter {
         ) {
           const pk = packet.pk.toString();
           const id = packet.i.toString();
+          const packetType = packet.y ? packet.y.toString() : '';
 
           const checksig = nacl.sign.detached.verify(
-            unpacked.p,
+            wrappedPacket,
             unpacked.s,
             bs58.decode(pk)
           );
@@ -169,18 +171,18 @@ export default class Meerkat extends EventEmitter {
             const ek = packet.ek.toString();
             this.sawPeer(pk, ek);
 
-            if (packet.y == 'm') {
+            if (packetType == 'm') {
               const messagestring = packet.v.toString();
-              const messagejson = null;
+              let messagejson = null;
               try {
-                const messagejson = JSON.parse(messagestring);
+                messagejson = JSON.parse(messagestring);
               } catch (e) {
                 console.warn(e);
               }
               if (messagejson) {
                 this.emit('message', this.address(pk), messagejson, packet);
               }
-            } else if (packet.y == 'r') {
+            } else if (packetType == 'r') {
               // rpc call
               const call = packet.c.toString();
               const argsstring = packet.a.toString();
@@ -201,7 +203,7 @@ export default class Meerkat extends EventEmitter {
               );
               // make the API call and send back response
               this.rpcCall(pk, call, args, nonce);
-            } else if (packet.y === 'rr') {
+            } else if (packetType === 'rr') {
               // rpc response
               const nonce = Meerkat.toHex(packet.rn);
               if (this.callbacks[nonce]) {
@@ -245,11 +247,11 @@ export default class Meerkat extends EventEmitter {
               } else {
                 console.warn('dropped response with no callback.', nonce);
               }
-            } else if (packet.y === 'p') {
+            } else if (packetType === 'p') {
               const address = this.address(pk);
               console.warn('ping from', address);
               this.emit('ping', address);
-            } else if (packet.y === 'x') {
+            } else if (packetType === 'x') {
               const address = this.address(pk);
               console.warn('got left from', address);
               delete this.peers[address];
@@ -287,7 +289,10 @@ export default class Meerkat extends EventEmitter {
     this.emit('wireseen', this.torrent.wires.length, wire);
     this.connections();
     // TODO: check sig and drop on failure - wire.peerExtendedHandshake
-    this.sawPeer(handshake.pk.toString(), handshake.ek.toString());
+    this.sawPeer(
+      handshake.publicKey.toString(),
+      handshake.encryptedPublicKey.toString()
+    );
   }
 
   register(name: string, callback: Function) {
@@ -297,8 +302,8 @@ export default class Meerkat extends EventEmitter {
   rpc(
     address: string,
     call: string,
-    args: { [key: string]: any },
-    callback: Function
+    args: { [key: string]: any } = {},
+    callback: Function = () => {}
   ) {
     if (this.peers[address]) {
       const publicKey = this.peers[address].publicKey;

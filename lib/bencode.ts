@@ -8,15 +8,6 @@ import type { BufferData, Packet } from '../types';
  * Added typescript & browser support
  */
 
-function digitCount(value: number) {
-  // Add a digit for negative numbers, as the sign will be prefixed
-  const sign = value < 0 ? 1 : 0;
-  // Guard against negative numbers & zero going into log10(),
-  // as that would return -Infinity
-  value = Math.abs(Number(value || 1));
-  return Math.floor(Math.log10(value)) + 1 + sign;
-}
-
 function getType(value: BufferData) {
   if (Buffer.isBuffer(value)) return 'buffer';
   if (ArrayBuffer.isView(value)) return 'arraybufferview';
@@ -252,12 +243,11 @@ export function decode(rawData: Buffer | Uint8Array): Packet {
   let data: Buffer;
 
   if (!Buffer.isBuffer(rawData)) {
-    data = Buffer.from(rawData);
+    data = Buffer.from(rawData.buffer, rawData.byteOffset, rawData.byteLength);
   } else {
     data = rawData;
   }
 
-  const bytes = data.length;
   const next = (): { [key: string]: any } | Array<any> | number | string => {
     switch (data[position]) {
       case DICTIONARY_START:
@@ -305,7 +295,9 @@ export function decode(rawData: Buffer | Uint8Array): Packet {
     const dict: { [key: string]: any } = {};
 
     while (data[position] !== END_OF_TYPE) {
-      dict[decode_buffer().toString()] = next();
+      const key = decode_buffer().toString();
+      const value = next();
+      dict[key] = value;
     }
 
     position++;
