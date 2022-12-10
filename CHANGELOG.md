@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.7](https://github.com/fabianbormann/meerkat/compare/v1.0.6...v1.0.7) (2022-12-10)
+
+
+### Bug Fixes
+
+* resolve packet decryption issue ([f51e355](https://github.com/fabianbormann/meerkat/commit/f51e355d7c67628af2e2eae51139256121f1f2c5))
+
 ## [1.0.6](https://github.com/fabianbormann/meerkat/compare/v1.0.5...v1.0.6) (2022-12-09)
 
 
