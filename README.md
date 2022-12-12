@@ -11,8 +11,19 @@ Meerkat aims to be a typescript bowser-based reimplementation of bugout: A brows
 
 ## 🚀 Getting Started
 
+### NPM
+
 ```zsh
 npm i @fabianbormann/meerkat
+```
+
+### Broswer
+
+```html
+<script src="https://fabianbormann.github.io/meerkat/meerkat.min.js"></script>
+<script>
+  const meerkat = new Meerkat({  ... });
+</script>
 ```
 
 ## 🤖 Use Meerkat as a Server
