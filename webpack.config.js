@@ -8,7 +8,7 @@ const config = {
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'meerkat.min.js',
-    library: ['Meerkat', 'meerkat'],
+    library: { name: 'Meerkat', type: 'var', export: 'default' },
     libraryTarget: 'umd',
   },
   experiments: {

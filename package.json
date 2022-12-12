@@ -5,6 +5,7 @@
   "main": "dist/meerkat.min.js",
   "module": "dist/meerkat.min.js",
   "scripts": {
+    "bundle": "npm run build && cp dist/meerkat.min.js .",
     "build": "webpack && tsc --emitDeclarationOnly",
     "test": "jest"
   },
