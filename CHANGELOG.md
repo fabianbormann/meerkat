@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.9](https://github.com/fabianbormann/meerkat/compare/v1.0.8...v1.0.9) (2022-12-12)
+
+
+### Bug Fixes
+
+* provide bundle for browser import, fix default import ([dc1bbf7](https://github.com/fabianbormann/meerkat/commit/dc1bbf7b0d7e0e9184f2f886dc097d44c7deb955))
+
 ## [1.0.8](https://github.com/fabianbormann/meerkat/compare/v1.0.7...v1.0.8) (2022-12-10)
 
 
