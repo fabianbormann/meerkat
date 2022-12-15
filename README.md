@@ -1,6 +1,6 @@
 # Meerkat
 
-Meerkat aims to be a typescript bowser-based reimplementation of bugout: A browser-to-browser networking built on WebTorrent
+Meerkat aims to be a typescript and webpack 5 friendly re-implementation of Bugout: A browser-to-browser networking built on WebTorrent
 
 <p align="center">
 
