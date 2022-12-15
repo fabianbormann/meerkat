@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.0.10](https://github.com/fabianbormann/meerkat/compare/v1.0.9...v1.0.10) (2022-12-15)
+
+
+### ⚠ BREAKING CHANGES
+
+* event connection now returns the wires itself not only the count
+
+### Features
+
+* event connection now returns the wires itself not only the count ([8bb689c](https://github.com/fabianbormann/meerkat/commit/8bb689c394808b92ce41819370685c43f9c65abe))
+
 ## [1.0.9](https://github.com/fabianbormann/meerkat/compare/v1.0.8...v1.0.9) (2022-12-12)
 
 
