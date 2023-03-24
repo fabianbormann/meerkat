@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.0.11](https://github.com/fabianbormann/meerkat/compare/v1.0.10...v1.0.11) (2022-12-15)
+
+
+### ⚠ BREAKING CHANGES
+
+* connections event just returns a list of wire identifiers not all the wire information
+
+### Features
+
+* connections event just returns a list of wire identifiers not all the wire information ([c408ac5](https://github.com/fabianbormann/meerkat/commit/c408ac5f858bd34bb493a8f4ba42eacf82ba0af6))
+
 ## [1.0.10](https://github.com/fabianbormann/meerkat/compare/v1.0.9...v1.0.10) (2022-12-15)
 
 
