@@ -1,13 +1,12 @@
 # Meerkat
 
-Meerkat aims to be a typescript and webpack 5 friendly re-implementation of Bugout: A browser-to-browser networking built on WebTorrent
-
-<p align="center">
-
-<img alt="Release" src="https://github.com/fabianbormann/meerkat/actions/workflows/release.yml/badge.svg?branch=main" />
-<img alt="semantic-release: angular" src="https://img.shields.io/badge/semantic--release-angular-e10079?logo=semantic-release" />
-
+<p align="left">
+<img alt="Tests" src="https://img.shields.io/github/actions/workflow/status/fabianbormann/meerkat/release.yml?label=Release&style=for-the-badge" />
+<a href="https://conventionalcommits.org"><img alt="conventionalcommits" src="https://img.shields.io/badge/Conventional%20Commits-1.0.0-%23FE5196?logo=conventionalcommits&style=for-the-badge" /></a>
 </p>
+
+
+Meerkat aims to be a typescript and webpack 5 friendly re-implementation of Bugout: A browser-to-browser networking built on WebTorrent
 
 ## 🚀 Getting Started
 
