@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.12](https://github.com/fabianbormann/meerkat/compare/v1.0.11...v1.0.12) (2023-03-24)
+
+
+### Bug Fixes
+
+* remove local storage from logger to allow meerkat to run in an environment without local storage ([d10bccc](https://github.com/fabianbormann/meerkat/commit/d10bccccc4adc89323675e707b7617bf0d4ce0b1))
+
 ## [1.0.11](https://github.com/fabianbormann/meerkat/compare/v1.0.10...v1.0.11) (2022-12-15)
 
 
