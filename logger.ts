@@ -3,6 +3,7 @@ import { LogLevel } from './types';
 export default class Logger {
   logLevel: LogLevel = 'info';
   private scope: string;
+  private enabled: boolean = true;
 
   constructor({
     scope,
@@ -19,20 +20,16 @@ export default class Logger {
     }
 
     if (typeof enabled === 'boolean') {
-      if (enabled) {
-        localStorage.setItem('Meerkat-Logging', 'true');
-      } else {
-        localStorage.setItem('Meerkat-Logging', 'false');
-      }
+      this.enabled = enabled;
     }
   }
 
   disable() {
-    localStorage.setItem('Meerkat-Logging', 'false');
+    this.enabled = false;
   }
 
   enable() {
-    localStorage.setItem('Meerkat-Logging', 'true');
+    this.enabled = true;
   }
 
   private formatMessage(logLevel: LogLevel, message: string): string {
@@ -94,7 +91,7 @@ export default class Logger {
       font-weight: bold';
     `;
 
-    if (localStorage.getItem('Meerkat-Logging') === 'true') {
+    if (this.enabled) {
       if (logLevel === 'debug' || logLevel === 'info') {
         console.log(
           this.formatMessage(logLevel, message),

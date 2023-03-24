@@ -413,12 +413,7 @@ export default class Meerkat extends EventEmitter {
   connections() {
     if (this.torrent.wires.length != this.lastwirecount) {
       this.lastwirecount = this.torrent.wires.length;
-      this.emit(
-        'connections',
-        this.torrent.wires.map(
-          (wire: any) => wire.extendedHandshake?.identifier
-        )
-      );
+      this.emit('connections', this.torrent.wires.length);
     }
     return this.lastwirecount;
   }
