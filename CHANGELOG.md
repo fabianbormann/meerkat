@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.0.13](https://github.com/fabianbormann/meerkat/compare/v1.0.12...v1.0.13) (2023-08-05)
+
+
+### Features
+
+* add bundle pipeline to release the browser bundle to gh pages ([571c851](https://github.com/fabianbormann/meerkat/commit/571c851a236f1169d5bc32a0966c45ffcf823776))
+* add cypress tests ([6b0e3ae](https://github.com/fabianbormann/meerkat/commit/6b0e3ae26fc783a842b281f3da4921c0e264580e))
+
+
+### Bug Fixes
+
+* update dependencies and update webpack build to make it work with the latest version. Remove jest, as the test pipeline was not working properly ([fdd8323](https://github.com/fabianbormann/meerkat/commit/fdd8323a014f6f98ef2011c3adde1848aa426513))
+
 ## [1.0.12](https://github.com/fabianbormann/meerkat/compare/v1.0.11...v1.0.12) (2023-03-24)
 
 
