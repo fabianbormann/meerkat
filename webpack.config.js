@@ -34,36 +34,39 @@ const config = {
     ],
   },
   resolve: {
-    extensions: ['.*', '.js', '.mjs', '.jsx', '.ts', '.tsx', '.scss'],
+    extensions: ['*', '.js', '.jsx', '.ts', '.tsx', '.scss'],
     fallback: {
-      assert: require.resolve('assert'),
+      assert: false,
       crypto: require.resolve('crypto-browserify'),
       stream: require.resolve('stream-browserify'),
       buffer: require.resolve('buffer/'),
       path: require.resolve('path-browserify'),
       https: require.resolve('https-browserify'),
       http: require.resolve('stream-http'),
-      url: require.resolve('url/'),
+      url: false,
       'process/browser': require.resolve('process/browser'),
       util: require.resolve('util/'),
-      net: require.resolve('net-browserify'),
-      fs: require.resolve('browserify-fs'),
-      querystring: require.resolve('querystring-es3'),
+      net: false,
+      fs: false,
+      querystring: false,
       dns: false,
       async_hooks: false,
       dgram: false,
-      zlib: require.resolve('browserify-zlib'),
+      zlib: false,
     },
   },
   plugins: [
     new webpack.ProgressPlugin(),
-    new CleanWebpackPlugin({
+    /*new CleanWebpackPlugin({
       verbose: true,
       cleanStaleWebpackAssets: true,
-    }),
+    }),*/
     new webpack.ProvidePlugin({
       Buffer: ['buffer', 'Buffer'],
       process: 'process/browser',
+    }),
+    new webpack.DefinePlugin({
+      global: 'globalThis',
     }),
   ],
   infrastructureLogging: {
