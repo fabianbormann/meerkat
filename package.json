@@ -6,7 +6,7 @@
   "module": "dist/meerkat.min.js",
   "scripts": {
     "build": "webpack && tsc --emitDeclarationOnly",
-    "test": "npm run bundle && cypress run"
+    "test": "npm run build && cypress run"
   },
   "repository": {
     "type": "git",
