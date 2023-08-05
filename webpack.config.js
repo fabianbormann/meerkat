@@ -34,8 +34,9 @@ const config = {
     ],
   },
   resolve: {
-    extensions: ['*', '.js', '.jsx', '.ts', '.tsx', '.scss'],
+    extensions: ['.*', '.js', '.mjs', '.jsx', '.ts', '.tsx', '.scss'],
     fallback: {
+      assert: require.resolve('assert'),
       crypto: require.resolve('crypto-browserify'),
       stream: require.resolve('stream-browserify'),
       buffer: require.resolve('buffer/'),
@@ -43,6 +44,15 @@ const config = {
       https: require.resolve('https-browserify'),
       http: require.resolve('stream-http'),
       url: require.resolve('url/'),
+      'process/browser': require.resolve('process/browser'),
+      util: require.resolve('util/'),
+      net: require.resolve('net-browserify'),
+      fs: require.resolve('browserify-fs'),
+      querystring: require.resolve('querystring-es3'),
+      dns: false,
+      async_hooks: false,
+      dgram: false,
+      zlib: require.resolve('browserify-zlib'),
     },
   },
   plugins: [
