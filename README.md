@@ -1,7 +1,9 @@
 # Meerkat
 
 <p align="left">
-<img alt="Tests" src="https://img.shields.io/github/actions/workflow/status/fabianbormann/meerkat/release.yml?label=Release&style=for-the-badge" />
+<img alt="Tests" src="https://img.shields.io/github/actions/workflow/status/fabianbormann/meerkat/test.yml?label=Release&style=for-the-badge" />
+<img alt="Release" src="https://img.shields.io/github/actions/workflow/status/fabianbormann/meerkat/release.yml?label=Release&style=for-the-badge" />
+<img alt="Bundle" src="https://img.shields.io/github/actions/workflow/status/fabianbormann/meerkat/bundle.yml?label=Release&style=for-the-badge" />
 <a href="https://conventionalcommits.org"><img alt="conventionalcommits" src="https://img.shields.io/badge/Conventional%20Commits-1.0.0-%23FE5196?logo=conventionalcommits&style=for-the-badge" /></a>
 </p>
 
@@ -19,7 +21,7 @@ npm i @fabianbormann/meerkat
 ### Broswer
 
 ```html
-<script src="https://fabianbormann.github.io/meerkat/meerkat.min.js"></script>
+<script src="https://fabianbormann.github.io/meerkat/latest/meerkat.min.js"></script>
 <script>
   const meerkat = new Meerkat({  ... });
 </script>
