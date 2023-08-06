@@ -1,6 +1,6 @@
 {
   "name": "@fabianbormann/meerkat",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "description": "Browser-to-browser networking built on WebTorrent",
   "main": "dist/meerkat.min.js",
   "module": "dist/meerkat.min.js",
