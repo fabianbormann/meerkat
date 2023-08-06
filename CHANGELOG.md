@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.14](https://github.com/fabianbormann/meerkat/compare/v1.0.13...v1.0.14) (2023-08-06)
+
+
+### Bug Fixes
+
+* solve non-base58 character error onExtendedHandshake ([8653c83](https://github.com/fabianbormann/meerkat/commit/8653c839bcd7d3eac08a740da3c9363ef18fa17e))
+
 ## [1.0.13](https://github.com/fabianbormann/meerkat/compare/v1.0.12...v1.0.13) (2023-08-05)
 
 
