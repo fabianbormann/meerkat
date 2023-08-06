@@ -306,8 +306,8 @@ export default class Meerkat extends EventEmitter {
     this.connections();
     // TODO: check sig and drop on failure - wire.peerExtendedHandshake
     this.sawPeer(
-      handshake.publicKey.toString(),
-      handshake.encryptedPublicKey.toString()
+      new TextDecoder().decode(handshake.publicKey),
+      new TextDecoder().decode(handshake.encryptedPublicKey)
     );
   }
 
