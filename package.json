@@ -28,8 +28,8 @@
   },
   "homepage": "https://github.com/fabianbormann/meerkat#readme",
   "devDependencies": {
-    "@babel/core": "^7.22.9",
-    "@babel/preset-env": "^7.22.9",
+    "@babel/core": "^7.22.10",
+    "@babel/preset-env": "^7.22.10",
     "@babel/preset-typescript": "^7.22.5",
     "@types/bs58check": "^2.1.0",
     "@types/ripemd160": "^2.0.0",
@@ -39,6 +39,7 @@
     "buffer": "^6.0.3",
     "clean-webpack-plugin": "^4.0.0",
     "crypto-browserify": "^3.12.0",
+    "cypress": "^12.17.3",
     "https-browserify": "^1.0.0",
     "path-browserify": "^1.0.1",
     "process": "^0.11.10",
@@ -53,8 +54,7 @@
     "@rvagg/ripemd160": "^2.2.4",
     "bs58": "^5.0.0",
     "bs58check": "^3.0.1",
-    "cypress": "^12.17.3",
     "tweetnacl": "^1.0.3",
-    "webtorrent": "^2.1.16"
+    "webtorrent": "^2.1.17"
   }
 }
