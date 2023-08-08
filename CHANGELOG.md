@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.15](https://github.com/fabianbormann/meerkat/compare/v1.0.14...v1.0.15) (2023-08-07)
+
+
+### Bug Fixes
+
+* update tracker list ([00f3cce](https://github.com/fabianbormann/meerkat/commit/00f3cce7741bd61c835a629afe0b44f82143ffd6))
+
 ## [1.0.14](https://github.com/fabianbormann/meerkat/compare/v1.0.13...v1.0.14) (2023-08-06)
 
 
