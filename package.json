@@ -28,26 +28,26 @@
   },
   "homepage": "https://github.com/fabianbormann/meerkat#readme",
   "devDependencies": {
-    "@babel/core": "^7.22.10",
-    "@babel/preset-env": "^7.22.10",
-    "@babel/preset-typescript": "^7.22.5",
-    "@types/bs58check": "^2.1.0",
-    "@types/ripemd160": "^2.0.0",
-    "@types/webtorrent": "^0.109.3",
+    "@babel/core": "^7.24.0",
+    "@babel/preset-env": "^7.24.0",
+    "@babel/preset-typescript": "^7.23.3",
+    "@types/bs58check": "^2.1.2",
+    "@types/ripemd160": "^2.0.3",
+    "@types/webtorrent": "^0.109.8",
     "babel-loader": "^9.1.3",
     "browsify": "^0.0.4",
     "buffer": "^6.0.3",
     "clean-webpack-plugin": "^4.0.0",
     "crypto-browserify": "^3.12.0",
-    "cypress": "^12.17.3",
+    "cypress": "^13.6.6",
     "https-browserify": "^1.0.0",
     "path-browserify": "^1.0.1",
     "process": "^0.11.10",
     "stream-browserify": "^3.0.0",
     "stream-http": "^3.2.0",
-    "typescript": "^5.1.6",
+    "typescript": "^5.4.2",
     "util": "^0.12.5",
-    "webpack": "^5.88.2",
+    "webpack": "^5.90.3",
     "webpack-cli": "^5.1.4"
   },
   "dependencies": {
@@ -55,6 +55,6 @@
     "bs58": "^5.0.0",
     "bs58check": "^3.0.1",
     "tweetnacl": "^1.0.3",
-    "webtorrent": "^2.1.17"
+    "webtorrent": "^2.1.37"
   }
 }
