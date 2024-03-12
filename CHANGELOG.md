@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.16](https://github.com/fabianbormann/meerkat/compare/v1.0.15...v1.0.16) (2024-03-12)
+
+
+### Bug Fixes
+
+* bump dependencies to their next versions and resolve security issues ([a37fab0](https://github.com/fabianbormann/meerkat/commit/a37fab00e4214533c9a7dab9a03297fbe05c4bb5))
+
 ## [1.0.15](https://github.com/fabianbormann/meerkat/compare/v1.0.14...v1.0.15) (2023-08-07)
 
 
