@@ -2,7 +2,6 @@ import nacl from 'tweetnacl';
 import type { SignKeyPair, BoxKeyPair } from 'tweetnacl';
 import bs58check from 'bs58check';
 import { Buffer } from 'buffer';
-import WebTorrent from 'webtorrent';
 import type { Wire, ExtensionConstructor } from 'bittorrent-protocol';
 import bs58 from 'bs58';
 import ripemd160 from 'ripemd160';
@@ -15,6 +14,7 @@ import {
 const PEER_TIMEOUT = 5 * 60 * 1000;
 const EXT = 'bo_channel';
 import Logger from './logger';
+let WebTorrent: any = null;
 
 export default class Meerkat extends EventEmitter {
   announce: Array<String>;
@@ -39,9 +39,14 @@ export default class Meerkat extends EventEmitter {
 
   constructor(parameters: MeerkatParameters = {}) {
     super();
+    let isBrowserEnvironmet = true;
+    if (typeof window === 'undefined' || typeof navigator === 'undefined') {
+      console.warn('Meerkat is designed to run in a browser environment.');
+      isBrowserEnvironmet = false;
+    }
+
     const { identifier, announce, seed, loggingEnabled } = parameters;
     this.logger = new Logger({ scope: 'Meerkat', enabled: loggingEnabled });
-
     this.announce = announce || [
       'wss://tracker.openwebtorrent.com',
       'wss://dev.btt.cf-identity-wallet.metadata.dev.cf-deployments.org',
@@ -66,29 +71,57 @@ export default class Meerkat extends EventEmitter {
     this.logger.debug(`Meerkat address: ${this.identifier}`);
     this.lastwirecount = null;
 
-    this.webTorrent = new WebTorrent({});
+    if (isBrowserEnvironmet) {
+      this.configureTorrent();
+    }
+  }
 
-    this.torrent = this.webTorrent.seed(
-      Buffer.from(this.identifier),
-      {
-        name: this.identifier,
-        announce: this.announce,
-      },
-      () => {
-        this.emit('torrent', this.identifier, this.torrent);
-        if (this.torrent.discovery.tracker) {
-          this.torrent.discovery.tracker.on('update', (update: any) => {
-            this.emit('tracker', this.identifier, update);
+  private async dynamicImportWebTorrent() {
+    if (WebTorrent === null) {
+      try {
+        const module = await import(/* webpackMode: "eager" */ 'webtorrent');
+        WebTorrent = module.default;
+      } catch (error) {
+        this.logger.error('Error loading WebTorrent:', error);
+        this.logger.warn(
+          'Meerkat will not be able to connect to peers. Please make sure using meerkat in a browser environment.'
+        );
+      }
+    }
+  }
+
+  private async configureTorrent() {
+    await this.dynamicImportWebTorrent();
+
+    if (WebTorrent === null) {
+      this.logger.warn(
+        'WebTorrent is not available in the current environment.'
+      );
+    } else {
+      this.webTorrent = new WebTorrent({});
+
+      this.torrent = this.webTorrent.seed(
+        Buffer.from(this.identifier),
+        {
+          name: this.identifier,
+          announce: this.announce,
+        },
+        () => {
+          this.emit('torrent', this.identifier, this.torrent);
+          if (this.torrent.discovery.tracker) {
+            this.torrent.discovery.tracker.on('update', (update: any) => {
+              this.emit('tracker', this.identifier, update);
+            });
+          }
+          this.torrent.discovery.on('trackerAnnounce', () => {
+            this.emit('announce', this.identifier);
+            this.connections();
           });
         }
-        this.torrent.discovery.on('trackerAnnounce', () => {
-          this.emit('announce', this.identifier);
-          this.connections();
-        });
-      }
-    );
-    this.torrentCreated = true;
-    this.torrent.on('wire', (wire: Wire) => this.attach(wire));
+      );
+      this.torrentCreated = true;
+      this.torrent.on('wire', (wire: Wire) => this.attach(wire));
+    }
   }
 
   disableLogging() {
