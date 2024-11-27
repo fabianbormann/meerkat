@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.17](https://github.com/fabianbormann/meerkat/compare/v1.0.16...v1.0.17) (2024-11-27)
+
+
+### Features
+
+* use dynamic imports to prevent meerkat from throwing errors in a non browser environment ([63a2c04](https://github.com/fabianbormann/meerkat/commit/63a2c04f97010fe09c0235ebd8bf837fe7df09da))
+
 ## [1.0.16](https://github.com/fabianbormann/meerkat/compare/v1.0.15...v1.0.16) (2024-03-12)
 
 
