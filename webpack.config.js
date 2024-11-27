@@ -10,6 +10,7 @@ const config = {
     filename: 'meerkat.min.js',
     library: { name: 'Meerkat', type: 'var', export: 'default' },
     libraryTarget: 'umd',
+    globalObject: 'this',
   },
   experiments: {
     asyncWebAssembly: true,
@@ -28,6 +29,7 @@ const config = {
               '@babel/preset-env',
               ['@babel/preset-typescript', { allowNamespaces: true }],
             ],
+            plugins: ['@babel/plugin-syntax-dynamic-import'],
           },
         },
       },
@@ -53,20 +55,22 @@ const config = {
       async_hooks: false,
       dgram: false,
       zlib: false,
+      vm: require.resolve('vm-browserify'),
     },
   },
   plugins: [
     new webpack.ProgressPlugin(),
-    /*new CleanWebpackPlugin({
+    new CleanWebpackPlugin({
       verbose: true,
       cleanStaleWebpackAssets: true,
-    }),*/
+    }),
     new webpack.ProvidePlugin({
       Buffer: ['buffer', 'Buffer'],
       process: 'process/browser',
     }),
     new webpack.DefinePlugin({
       global: 'globalThis',
+      self: 'globalThis',
     }),
   ],
   infrastructureLogging: {
