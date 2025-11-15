@@ -5,7 +5,7 @@
 
 ### Bug Fixes
 
-* update year in license as fix to trigger release pipeline ([37d4f0e](https://github.com/fabianbormann/meerkat/commit/37d4f0e0507cf608147b3961a618c4b0a66ac5e7))
+* use alternative to ip package to remove security warnings in npm install ([37d4f0e](https://github.com/fabianbormann/meerkat/commit/7b917741008931eb0de6109053479f070a241f3f))
 
 ## [1.0.17](https://github.com/fabianbormann/meerkat/compare/v1.0.16...v1.0.17) (2024-11-27)
 
